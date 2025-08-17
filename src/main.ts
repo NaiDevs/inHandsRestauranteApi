@@ -10,6 +10,6 @@ async function bootstrap() {
   // Render escanea el contenedor y necesita que escuches en process.env.PORT y 0.0.0.0
   const port = parseInt(process.env.PORT ?? '3000', 10);
   await app.listen(port, '0.0.0.0');
-  // console.log(`API running on port ${port}`);
+  console.log(`API running on port ${port}`);
 }
 bootstrap();
