@@ -13,6 +13,7 @@ export class HealthTask {
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   async createPing(): Promise<void> {
+    console.log('Ejecutando tarea de ping: creando registro en la tabla ping');
     await this.pingRepository.save(this.pingRepository.create());
   }
 }

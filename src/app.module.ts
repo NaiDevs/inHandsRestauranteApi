@@ -2,6 +2,7 @@ import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
+import { HealthModule } from './controllers/health/health.module';
 
 @Module({
   imports: [
@@ -58,18 +59,19 @@ import { join } from 'path';
       },
     }),
 
-    // Resto de módulos de la app (actívalos cuando quieras)
-    // AuthModule,
-    // BrandsModule,
-    // CategoriesModule,
-    // ConfigsModule,
-    // InvoicesModule,
-    // LocationModule,
-    // OrdersModule,
-    // ProductsModule,
-    // QuotesModule,
-    // ReportsModule,
-    // UsersModule,
+  // Resto de módulos de la app (actívalos cuando quieras)
+  HealthModule,
+  // AuthModule,
+  // BrandsModule,
+  // CategoriesModule,
+  // ConfigsModule,
+  // InvoicesModule,
+  // LocationModule,
+  // OrdersModule,
+  // ProductsModule,
+  // QuotesModule,
+  // ReportsModule,
+  // UsersModule,
   ],
 })
 export class AppModule implements NestModule {
