@@ -1,57 +1,75 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-// import { LoggingMiddleware } from './common/middleware/logging.middleware';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { HealthModule } from './controllers/health/health.module';
-
-// Importar todos los módulos de la aplicación
-// import { AuthModule } from './controllers/auth/auth.module';
-// import { BrandsModule } from './controllers/brands/brands.module';
-// import { CategoriesModule } from './controllers/categories/categories.module';
-// import { ConfigsModule } from './controllers/configs/configs.module';
-// import { InvoicesModule } from './controllers/invoices/invoices.module';
-// import { LocationModule } from './controllers/location/location.module';
-// import { OrdersModule } from './controllers/orders/orders.module';
-// import { ProductsModule } from './controllers/products/products.module';
-// import { QuotesModule } from './controllers/quotes/quotes.module';
-// import { ReportsModule } from './controllers/reports/reports.module';
-// import { UsersModule } from './controllers/users/users.module';
+import { join } from 'path';
 
 @Module({
   imports: [
+    // Config global
     ConfigModule.forRoot({ isGlobal: true }),
 
+    // Conexión a Postgres (Render + local)
     TypeOrmModule.forRootAsync({
       name: 'dbinhands',
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        name: 'dbinhands',
-        type: 'postgres',
-        host: config.get('DB_HOST'),
-        port: config.get<number>('DB_PORT'),
-        username: config.get('DB_USER'),
-        password: config.get('DB_PASS'),
-        database: config.get('DB_NAME'),
-        entities: [__dirname + '/database/dbinhandsRestaurante/**/*{.ts,.js}'],
-        synchronize: false,
-        migrationsRun: false,
-      }),
+      useFactory: (config: ConfigService) => {
+        const isProd = config.get<string>('NODE_ENV') === 'production';
+
+        // Si tienes DATABASE_URL en Render, úsala;
+        // si no, caes a host/port/user/pass/name.
+        const databaseUrl = config.get<string>('DATABASE_URL');
+
+        // Render Postgres suele requerir SSL
+        const useSSL = config.get<string>('DB_SSL') === 'true';
+
+        return {
+          name: 'dbinhands',
+          type: 'postgres' as const,
+          ...(databaseUrl
+            ? { url: databaseUrl }
+            : {
+                host: config.get<string>('DB_HOST'),
+                port: config.get<number>('DB_PORT') ?? 5432,
+                username: config.get<string>('DB_USER'),
+                password: config.get<string>('DB_PASS'),
+                database: config.get<string>('DB_NAME'),
+              }),
+
+          // En desarrollo puedes tener .ts, en producción .js bajo /dist
+          entities: [
+            // ajusta el path si tus entidades no usan .entity
+            join(__dirname, 'database/dbinhandsRestaurante/**/*.entity.{ts,js}'),
+            join(__dirname, 'database/dbinhandsRestaurante/**/*.{ts,js}'),
+          ],
+
+          // No sincronices en prod salvo que sea intencional
+          synchronize: false,
+          migrationsRun: false,
+
+          // SSL para Render (relaja el cert)
+          ssl: useSSL,
+          extra: useSSL ? { ssl: { rejectUnauthorized: false } } : undefined,
+
+          // Opcional pero útil para Nest + TypeORM
+          // autoLoadEntities: true, // usa esto si registras entidades via @Entity en módulos
+          // logging: isProd ? ['error', 'warn'] : ['query', 'error', 'warn'],
+        };
+      },
     }),
 
-  // Módulos de la aplicación
-  HealthModule,
-  // AuthModule,
-  // BrandsModule,
-  // CategoriesModule,
-  // ConfigsModule,
-  // InvoicesModule,
-  // LocationModule,
-  // OrdersModule,
-  // ProductsModule,
-  // QuotesModule,
-  // ReportsModule,
-  // UsersModule,
+    // Resto de módulos de la app (actívalos cuando quieras)
+    // AuthModule,
+    // BrandsModule,
+    // CategoriesModule,
+    // ConfigsModule,
+    // InvoicesModule,
+    // LocationModule,
+    // OrdersModule,
+    // ProductsModule,
+    // QuotesModule,
+    // ReportsModule,
+    // UsersModule,
   ],
 })
 export class AppModule implements NestModule {
