@@ -3,6 +3,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { HealthModule } from './controllers/health/health.module';
+import { AuthModule } from './controllers/auth/auth.module';
+import { ProductCategoryModule } from './controllers/productCategory/productCategory.module';
+import { ProductBrandModule } from './controllers/productBrand/productBrand.module';
+import { DishCategoryModule } from './controllers/dishCategory/dishCategory.module';
+import { RawMaterialCategoryModule } from './controllers/rawMaterialCategory/rawMaterialCategory.module';
 
 @Module({
   imports: [
@@ -61,17 +66,11 @@ import { HealthModule } from './controllers/health/health.module';
 
   // Resto de módulos de la app (actívalos cuando quieras)
   HealthModule,
-  // AuthModule,
-  // BrandsModule,
-  // CategoriesModule,
-  // ConfigsModule,
-  // InvoicesModule,
-  // LocationModule,
-  // OrdersModule,
-  // ProductsModule,
-  // QuotesModule,
-  // ReportsModule,
-  // UsersModule,
+  AuthModule,
+  DishCategoryModule,
+  ProductCategoryModule,
+  ProductBrandModule,
+  RawMaterialCategoryModule,
   ],
 })
 export class AppModule implements NestModule {
